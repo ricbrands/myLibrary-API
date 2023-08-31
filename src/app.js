@@ -1,26 +1,38 @@
 import express from "express";
+import db from "./config/dbConnect.js"
+import books from "./models/Book.js";
+
+db.on("error", console.log.bind(console, 'Connection error'))
+db.once("open", () => {
+    console.log("Connect sucessfully with mongoDB")
+})
 
 const app = express();
 
 app.use(express.json())
 
-const books = [
-    {
-        id: 1,
-        title: "Harry Potter"
-    },
-    {
-        id: 2,
-        title: "Little Prince"
-    }
-]
+// const books = [
+//     {
+//         id: 1,
+//         title: "Harry Potter"
+//     },
+//     {
+//         id: 2,
+//         title: "Little Prince"
+//     }
+// ]
 
 app.get('/', (req, res) => {
     res.status(200).send('A simple API for library');
 })
 
-app.get('/books', (req, res) => {
-    res.status(200).json(books)
+app.get('/books', async (req, res) => {
+    try {
+        const booksResult = await books.find();
+        res.status(200).json(booksResult)
+    } catch (err) {
+        res.status(500).json(err);
+    }
 })
 
 app.get('/books/:id', (req, res) => {
