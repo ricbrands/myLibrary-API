@@ -1,6 +1,7 @@
 import express from "express";
 import db from "./config/dbConnect.js"
 import books from "./models/Book.js";
+import routes from "./routes/index.js";
 
 db.on("error", console.log.bind(console, 'Connection error'))
 db.once("open", () => {
@@ -10,6 +11,8 @@ db.once("open", () => {
 const app = express();
 
 app.use(express.json())
+
+routes(app);
 
 // const books = [
 //     {
@@ -21,19 +24,6 @@ app.use(express.json())
 //         title: "Little Prince"
 //     }
 // ]
-
-app.get('/', (req, res) => {
-    res.status(200).send('A simple API for library');
-})
-
-app.get('/books', async (req, res) => {
-    try {
-        const booksResult = await books.find();
-        res.status(200).json(booksResult)
-    } catch (err) {
-        res.status(500).json(err);
-    }
-})
 
 app.get('/books/:id', (req, res) => {
     let index = searchBook(req.params.id);
