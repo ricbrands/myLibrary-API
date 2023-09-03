@@ -20,6 +20,10 @@ class AuthorController {
         }
     }
 
+    static getAuthorByName = async(name) => {
+        return await authors.findOne({"name": name});
+    }
+
     static createAuthor = async (req, res) => {
         try {
             let author = new authors(req.body);
