@@ -1,58 +1,70 @@
+import NotFound from "../errors/NotFound.js";
 import authors from "../models/Author.js";
 
 class AuthorController {
-    static authorsList = async (req, res) => {
-        try {
-            const authorsResult = await authors.find();
-            res.status(200).json(authorsResult)
-        } catch (err) {
-            res.status(500).json(err);
-        }
+  static authorsList = async (req, res, next) => {
+    try {
+      const authorsResult = await authors.find();
+      res.status(200).json(authorsResult);
+    } catch (err) {
+      next(err);
     }
+  };
 
-    static authorListById = async(req, res) => {
-        try {
-            const id = req.params.id;
-            const authorsResult = await authors.findById(id);
-            res.status(200).send(authorsResult);
-        } catch (err) {
-            res.status(500).json(err);
-        }
-    }
+  static authorListById = async(req, res, next) => {
+    try {
+      const id = req.params.id;
+      const authorsResult = await authors.findById(id);
+      if (authorsResult !== null) {
+        res.status(200).send(authorsResult);
+      } else {
+        next(new NotFound("Author not found."));
+      }      
+    } catch (err) {
+      next(err);    }
+  };
 
-    static getAuthorByName = async(name) => {
-        return await authors.findOne({"name": name});
-    }
+  static getAuthorByName = async(name) => {
+    return await authors.findOne({"name": name});
+  };
 
-    static createAuthor = async (req, res) => {
-        try {
-            let author = new authors(req.body);
-            const result = await author.save();
-            res.status(201).send(author.toJSON());
-        } catch(err){
-            res.status(500).send({message: `Error to create author: ${err.message}`})
-        }
+  static createAuthor = async (req, res, next) => {
+    try {
+      let author = new authors(req.body);
+      const authorResult = await author.save();
+      res.status(201).send(authorResult.toJSON());
+    } catch(err){
+      next(err);
     }
+  };
 
-    static updateAuthor = async (req, res) => {
-        try {
-            const id = req.params.id;
-            const result = await authors.findByIdAndUpdate(id, {$set: req.body});
-            res.status(200).send({message: "author sucessfully updated!"});
-        } catch(err) {
-            res.status(500).send({message: err.message})
-        }
+  static updateAuthor = async (req, res, next) => {
+    try {
+      const id = req.params.id;
+      const authorsResult = await authors.findByIdAndUpdate(id, {$set: req.body});
+      if (authorsResult !== null) {
+        res.status(200).send({message: "author sucessfully updated!"});
+      } else {
+        next(new NotFound("Author not found."));
+      }
+    } catch(err) {
+      next(err);
     }
+  };
 
-    static deleteAuthor = async (req, res) => {
-        try{
-            const id = req.params.id;
-            const result = await authors.findByIdAndDelete(id);
-            res.status(200).send({message: "author deleted sucessfully!"})
-        } catch(err){
-            res.status(500).send({message: err.message})
-        }
+  static deleteAuthor = async (req, res, next) => {
+    try{
+      const id = req.params.id;
+      const authorsResult = await authors.findByIdAndDelete(id);
+      if (authorsResult !== null) {
+        res.status(200).send({message: "author deleted sucessfully!"});
+      } else {
+        next(new NotFound("Author not found."));
+      }
+    } catch(err){
+      next(err);
     }
+  };
 }
 
-export default AuthorController
+export default AuthorController;
